@@ -11,7 +11,6 @@ This repository contains all of the necessary code to take a survey simulation f
 * sncosmo >= 1.8
 
 The all requirements but the last can be satisfied with a pip or conda install.
-```
 
 ## Data files
 [An example input simulation file can be found here](https://berkeley.box.com/s/gyhihojco0eh6i2trsc19mvh9kbkopwm). You must download this file and move it to the `data` directory to be able to run `WFIRST_sims.py`.
