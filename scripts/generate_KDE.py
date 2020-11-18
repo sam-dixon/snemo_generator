@@ -1,24 +1,24 @@
 """Train Kernel Density Estimates of the distribution of SNEMO coefficients
 """
 import os
-import copy
 import pickle
 import sncosmo
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+from snemo_gen import DATADIR
 from sklearn.neighbors import KernelDensity
 from sklearn.model_selection import GridSearchCV
 
-
-FITS = pd.read_csv('data/anon_snf_fits_published_snemo_and_salt.csv', index_col=0)
+fits_path = os.path.join(DATADIR, 'anon_snf_fits_published_snemo_and_salt.csv')
+FITS = pd.read_csv(fits_path, index_col=0)
 
 
 def get_data(model_name):
     """Gathers all the SNf fit data for a given model
     
     Args:
-        model_name: Name of SED model (one of 'salt2', 'snemo2', 'snemo7', or 'snemo15')
+        model_name: Name of SED model (one of 'salt2', 'snemo2', 'snemo7', or
+        'snemo15')
     
     Returns:
         df: pandas.DataFrame containing model coefficients
@@ -33,16 +33,17 @@ def get_data(model_name):
 
 
 def calc_kde(model_name):
-    """Calculates an estimate of the probability distribution for the coefficients
-    of the given model based on the observed distribution of coefficients in the SNf
-    sample.
+    """Calculates an estimate of the probability distribution for the
+    coefficients of the given model based on the observed distribution of
+    coefficients in the SNf sample.
     
     Args:
-        model_name: Name of SED model (one of 'salt2', 'snemo2', 'snemo7', or 'snemo15')
+        model_name: Name of SED model (one of 'salt2', 'snemo2', 'snemo7', or
+        'snemo15')
         
     Returns:
-        kde: trained scikit-learn KDE object with bandwidth optimized through grid-search
-             cross-validation
+        kde: trained scikit-learn KDE object with bandwidth optimized through
+        grid-search cross-validation
         v: Unitary matrix from SVD of coefficient covariance matrix
         l: Vector of singular values from SVD of coefficent cov. mat.
         grid: scikit-learn GridSearchCV object with history of cross-validation
@@ -62,8 +63,9 @@ def calc_kde(model_name):
 def main():
     for model_name in ['SNEMO2', 'SNEMO7', 'SNEMO15']:
         print('Fitting KDE for ' + model_name)
-        kde, v, l, grid = calc_kde(model_name)
-        pickle.dump(calc_kde(model_name), open('data/{}_KDE_published.pkl'.format(model_name), 'wb'))
+        path = os.path.join(DATADIR, '{}_KDE_published.pkl'.format(model_name))
+        with open(path, 'wb') as f:
+            pickle.dump(calc_kde(model_name), f)
 
         
 if __name__=='__main__':

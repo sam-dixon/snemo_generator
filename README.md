@@ -2,33 +2,30 @@
 
 This repository contains all of the necessary code to take a survey simulation file from David Rubin (repo to be shared soon) to a simulated supernova survey using SNEMO as the underlying SED model. Comments, issues, and pull requests are welcome!
 
-## Requirements
-* numpy
-* scipy
-* scikit-learn
-* pandas
-* tqdm (for nice progress bars)
-* sncosmo >= 1.8
-
-The all requirements but the last can be satisfied with a pip or conda install.
+## Installation
+Setup a conda environment and activate it with
+```
+conda env create -f environment.yml
+conda activate snemo_gen
+```
 
 ## Data files
 [An example input simulation file can be found here](https://berkeley.box.com/s/gyhihojco0eh6i2trsc19mvh9kbkopwm). You must download this file and move it to the `data` directory to be able to run `WFIRST_sims.py`.
 
 ## Running the code 
-There are three main parts to this repository:
+There are three scripts to reproduce this work:
 
-1. `generate_KDE.py`: Modeling the underlying distribution of the SNEMO coefficients
-2. `v0_extension.py`: Extending the wavelength range of the model
-3. `WFIRST_sims.py`: Creating light-curves and spectra using the signal-to-noise ratios produced in David's code
+1. `generate_KDE.py`: Models the underlying distribution of the SNEMO coefficients
+2. `v0_extension.py`: Extends the wavelength range of the model
+3. `WFIRST_sims.py`: Creates light-curves and spectra using the signal-to-noise ratios produced in David's code
 
-Steps 1 and 2 only need to be run once. Step 3 can then be rerun for any new survey simulation file. The outputs of steps 1 and 2 (i.e. the KDE files and extended SNEMO templates) can be used for other analyses. 
+Steps 1 and 2 only need to be run once. Step 3 can then be rerun for any new survey simulation file. The outputs of steps 1 and 2 (i.e. the KDE files and extended SNEMO templates) can be used for other analyses using the `snemo_gen` package.
 
 ## Using the KDE files
 The KDE files model the distribution of coefficients for each SNEMO version. There are some tricky parts to using these files because the KDEs are fit in a rotated and rescaled space and we estimate the distribution of the absolute magnitudes rather than the $c_0$ scaling parameters directly. The KDE files that are generated with `generate_KDE.py` are a list of 4 elements:
 
 1. `kde`: the trained scikit-learn `KernelDensity` estimator
-2. `v`: unitary matrix used in the SVD transformation applied to the data before fitting the KDE
+2. `v`: unitary matrix used in the whitening transformation applied to the data before fitting the KDE
 3. `l`: singular values of the SVD transformation
 4. `grid`: the scikit-learn `GridSearchCV` object produced in the hyperparameter determination
 
@@ -65,6 +62,8 @@ model.set(**param_dict)
 # Set the scaling parameter
 model.set_source_peakabsmag(sample[0]-19.1, 'bessellb', 'ab')
 ```
+
+This functionality is wrapped in `snemo_gen.kde.sample_snemo_kde` and `snemo_gen.kde.MB_to_c0`.
 
 ## Using the extended SNEMO templates
 The extended SNEMO templates produced by `v0_extension.py` can be used in `sncosmo` just like any other templates. We can create a source object and use that source within a `Model` with

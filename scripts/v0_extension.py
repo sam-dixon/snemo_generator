@@ -2,14 +2,16 @@
 """
 
 import os
-import sys
 import sncosmo
 import numpy as np
-import matplotlib.pyplot as plt
+from snemo_gen import DATADIR
 from scipy.interpolate import RectBivariateSpline as spl
 
 
-def main(model_name, output_dir='data/extended_models'):
+OUTPATH = os.path.join(DATADIR, 'extended_models')
+
+
+def main(model_name, output_dir=OUTPATH):
     # Load SNEMO model
     snemo = sncosmo.get_source(model_name)
     WAVES = snemo._wave
@@ -83,4 +85,4 @@ def main(model_name, output_dir='data/extended_models'):
     
 if __name__=='__main__':
     for ncomp in [2, 7, 15]:
-        main('snemo{}'.format(ncomp), 'data/extended_models')
+        main('snemo{}'.format(ncomp))

@@ -1,0 +1,13 @@
+name: snemo_gen
+channels:
+  - default
+  - conda-forge
+dependencies:
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - tqdm
+  - sncosmo>=1.8
+  - jupyterlab

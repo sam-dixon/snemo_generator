@@ -1,13 +1,11 @@
-"""Generates a simulated supernova survey using SNEMO as the underlying SED model from a survey
-information file
+"""Generates a simulated WFIRST-like supernova survey using SNEMO as the SED model.
 """
 import os
-import copy
 import pickle
 import sncosmo
 import numpy as np
-import matplotlib.pyplot as plt
 from tqdm import tqdm
+from snemo_gen import kde, DATADIR
 
 
 def read_and_register(path, name=None):
@@ -24,54 +22,14 @@ def read_and_register(path, name=None):
     sncosmo.registry.register(band)
 
 # Load in WFIRST filters
-for f in os.listdir('data/filts/'):
-    read_and_register(os.path.join('data/filts/', f))
+filt_dir = os.path.join(DATADIR, 'filts')
+for f in os.listdir(filt_dir):
+    read_and_register(os.path.join(filt_dir, f))
 
 # Load prism information
-prism_info_path = 'data/prism_info.pkl'
+prism_info_path = os.path.join(DATADIR, 'prism_info.pkl')
 prism_info = pickle.load(open(prism_info_path, 'rb'))
 prism_wave = prism_info[0.125][1]
-
-
-def sample_snemo_kde(n, model):
-    """Generate samples from a KDE of the SNEMO parameters.
-
-    Args:
-        n: Number of parameter samples
-        model: sncosmo.Model object to use
-
-    Returns:
-        list of dictionaries of SNEMO parameters
-    """
-    kde_path = 'data/{}_KDE_published.pkl'.format(model.source.name)
-    param_names = ['MB', *model.source.param_names[1:]]
-    with open(kde_path, 'rb') as f:
-        KDE, rot, eigenvals, grid = pickle.load(f)
-    unscaled_samples = KDE.sample(n, random_state=0)
-    samples = (rot @ np.diag(np.sqrt(eigenvals)) @ unscaled_samples.T).T
-    param_dict = [dict(zip(param_names, samp)) for samp in samples]
-    return param_dict
-
-
-def MB_to_c0(param_dict, model, z, t0):
-    """Calculate the value of c0 given the other model parameters, MB and the redshift
-    
-    Args:
-        param_dict: dictionary of the model parameters sampled from the KDE
-        model: sncosmo.Model object to use
-        z: Redshift of the object
-        
-    Returns:
-        param_dict_with_c0: dictionary of all the model parameters, including the correct c0, that
-                            are needed to use the sncosmo simulation tools (i.e. sncosmo.realize_lcs)
-    """
-    model = copy.copy(model)
-    model.set(z=z, t0=t0)
-    for param_name in model.source.param_names[1:]:
-        model.set(**{param_name: param_dict[param_name]})
-    model.set_source_peakabsmag(param_dict['MB']-19.1, 'bessellb', 'ab')
-    param_dict_with_c0 = dict(zip(model.param_names, model.parameters))
-    return param_dict_with_c0
 
 
 def lc_obs_info(obs):
@@ -233,11 +191,14 @@ def main(survey_path, model_name):
     
     print('Loading model')
     if 'ext' in model_name:
-        model_path = 'data/extended_models/{}.dat'.format(model_name)
-        model = sncosmo.Model(source=sncosmo.models.SNEMOSource(model_path, name=model_name[4:]))
+        ext_model_dir = os.path.join(DATADIR, 'extended_models')
+        model_path = os.path.join(ext_model_dir, '{}.dat'.format(model_name))
+        model = sncosmo.Model(source=sncosmo.models.SNEMOSource(model_path,
+                                                                name=model_name[4:]))
     else:
         model = sncosmo.Model(source=model_name)
-    params = sample_snemo_kde(len(survey['SN_observations']), model)
+    params = kde.sample_snemo_kde(len(survey['SN_observations']), model,
+                                  random_state=0)
     
     zs = survey['SN_table']['redshifts']
     daymaxes = survey['SN_table']['daymaxes']
@@ -279,10 +240,12 @@ def main(survey_path, model_name):
         survey_with_prism_spectra.append(sn)
         
     print('Saving...')
-    save_path = 'data/{}_{}'.format(model_name, survey_path.split('/')[-1].split('.')[0])
+    save_path = os.path.join(DATADIR, '{}_{}'.format(model_name,
+                                                     survey_path.split('/')[-1].split('.')[0]))
     if not os.path.isdir(save_path):
         os.makedirs(save_path)
-    for i, sn in tqdm(enumerate(survey_with_prism_spectra), total=len(survey_with_prism_spectra)):
+    for i, sn in tqdm(enumerate(survey_with_prism_spectra),
+                      total=len(survey_with_prism_spectra)):
         fname = '{:04d}.pkl'.format(i)
         path = os.path.join(save_path, fname)
         with open(path, 'wb') as f:
@@ -290,7 +253,7 @@ def main(survey_path, model_name):
 
 
 if __name__=='__main__':
-    survey_path = 'data/1hr_per_pointing_imaging+prism.pkl'
+    survey_path = os.path.join(DATADIR, '1hr_per_pointing_imaging+prism.pkl')
     model_name = 'ext_snemo7'
     main(survey_path, model_name)
 
