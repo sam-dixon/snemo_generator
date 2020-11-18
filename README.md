@@ -9,8 +9,15 @@ conda env create -f environment.yml
 conda activate snemo_gen
 ```
 
+Then install the package with 
+```
+python setup.py install
+```
+
 ## Data files
 [An example input simulation file can be found here](https://berkeley.box.com/s/gyhihojco0eh6i2trsc19mvh9kbkopwm). You must download this file and move it to the `data` directory to be able to run `WFIRST_sims.py`.
+
+The KDE files and extended SNEMO models are included in `snemo_gen/data` and are automatically included when installing the `snemo_gen` package.
 
 ## Running the code 
 There are three scripts to reproduce this work:
