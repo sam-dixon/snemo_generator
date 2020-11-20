@@ -1,4 +1,4 @@
-"""Generates a simulated WFIRST-like supernova survey using SNEMO as the SED model.
+"""Generates a simulated Roman-like supernova survey using SNEMO as the SED model.
 """
 import os
 import pickle
@@ -21,7 +21,7 @@ def read_and_register(path, name=None):
     band = sncosmo.Bandpass(wave=wave, trans=trans, name=name)
     sncosmo.registry.register(band)
 
-# Load in WFIRST filters
+# Load in Roman filters
 filt_dir = os.path.join(DATADIR, 'filts')
 for f in os.listdir(filt_dir):
     read_and_register(os.path.join(filt_dir, f))

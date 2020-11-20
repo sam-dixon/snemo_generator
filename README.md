@@ -1,4 +1,4 @@
-# WFIRST Simulations with SNEMO
+# Roman Simulations with SNEMO
 
 This repository contains all of the necessary code to take a survey simulation file from David Rubin (repo to be shared soon) to a simulated supernova survey using SNEMO as the underlying SED model. Comments, issues, and pull requests are welcome!
 
@@ -15,7 +15,7 @@ python setup.py install
 ```
 
 ## Data files
-[An example input simulation file can be found here](https://berkeley.box.com/s/gyhihojco0eh6i2trsc19mvh9kbkopwm). You must download this file and move it to the `data` directory to be able to run `WFIRST_sims.py`.
+[An example input simulation file can be found here](https://berkeley.box.com/s/gyhihojco0eh6i2trsc19mvh9kbkopwm). You must download this file and move it to the `data` directory to be able to run `roman_sims.py`.
 
 The KDE files and extended SNEMO models are included in `snemo_gen/data` and are automatically included when installing the `snemo_gen` package.
 
@@ -24,7 +24,7 @@ There are three scripts to reproduce this work:
 
 1. `generate_KDE.py`: Models the underlying distribution of the SNEMO coefficients
 2. `v0_extension.py`: Extends the wavelength range of the model
-3. `WFIRST_sims.py`: Creates light-curves and spectra using the signal-to-noise ratios produced in David's code
+3. `roman_sims.py`: Creates light-curves and spectra using the signal-to-noise ratios produced in David's code
 
 Steps 1 and 2 only need to be run once. Step 3 can then be rerun for any new survey simulation file. The outputs of steps 1 and 2 (i.e. the KDE files and extended SNEMO templates) can be used for other analyses using the `snemo_gen` package.
 
@@ -81,8 +81,8 @@ snemo_ext = sncosmo.Model(source=snemo_source)
 ```
 You can replace `ext_snemo15.dat` with `ext_snemo7.dat` or `ext_snemo2.dat` depending on which version of SNEMO you'd like to use.
 
-## Using the WFIRST simulation files
-`WFIRST_sim.py` produces one pickle file for each object in the survey in a subdirectory of `data` with the same name as the input file. Each of these pickle files contains a dictionary with the following keys:
+## Using the Roman simulation files
+`roman_sim.py` produces one pickle file for each object in the survey in a subdirectory of `data` with the same name as the input file. Each of these pickle files contains a dictionary with the following keys:
 
 * `z`: (`float`) redshift of object
 * `t0`: (`float`) time of maximum
